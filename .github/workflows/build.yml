@@ -24,12 +24,21 @@ jobs:
           gradle-version: '8.7'
 
       - name: Build debug APK
-        working-directory: AlooSensiPro
-        run: gradle --no-daemon assembleDebug
+        shell: bash
+        run: |
+          SETTINGS=$(find . -name settings.gradle -not -path "*/build/*" | head -n 1)
+          if [ -z "$SETTINGS" ]; then
+            echo "settings.gradle nahi mili. Project files repo ke andar sahi jagah par nahi hain."
+            exit 1
+          fi
+          PROJ_DIR=$(dirname "$SETTINGS")
+          echo "Project folder: $PROJ_DIR"
+          cd "$PROJ_DIR"
+          gradle --no-daemon assembleDebug
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: ALOO-SENSI-PRO-debug-apk
-          path: AlooSensiPro/app/build/outputs/apk/debug/app-debug.apk
+          path: "**/app/build/outputs/apk/debug/app-debug.apk"
           if-no-files-found: error
